@@ -144,7 +144,7 @@ class SampleJythonFileIngestModule(FileIngestModule):
             return IngestModule.ProcessResult.OK
 		
         # Create Temp directory	
-        temp_Dir = Case.getCurrentCase().getTempDirectory() + "\\" + "Suspicious Files"
+        temp_Dir = Case.getCurrentCase().getTempDirectory() + "\\" + "Suspicious_Files"
         self.log(Level.INFO, "create Directory " + temp_Dir)
 
         try:
@@ -196,9 +196,10 @@ class SampleJythonFileIngestModule(FileIngestModule):
             while (len != -1):
                     totLen = totLen + len
                     len = inputStream.read(buffer)
-        else:
-            os.system("del "+temp_File)
-        f.close()
+            f.close()
+        elif (sig.startswith(sigDic[ext]))==1:
+            f.close()
+            os.remove(temp_File)
         return IngestModule.ProcessResult.OK
 
     # Where any shutdown code is run and resources are freed.
