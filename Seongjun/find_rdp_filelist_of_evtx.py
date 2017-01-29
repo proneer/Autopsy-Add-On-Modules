@@ -91,7 +91,7 @@ class FindEVTXFilesIngestModule(FileIngestModule):
 
         if (inputStream.read(buffer) != -1):
             if (buffer[:8].tostring() == "\x45\x6c\x66\x46\x69\x6c\x65\x00"):
-                if (file.getName().find("Microsoft-Windows-TerminalServices-LocalSessionManager%4\Operational") != -1):
+                if (file.getName().find("Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational") != -1):
                     art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT)
                     att = BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SET_NAME.getTypeID(), 
                           FindEVTXFilesIngestModuleFactory.moduleName, "RDP Access log in EVTX")
