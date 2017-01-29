@@ -163,7 +163,7 @@ class SampleJythonFileIngestModule(FileIngestModule):
         sig=f.read(8)
 
         #If it does not start with in Dictionary...
-        if !sig.startswith(sigDic[ext]):
+        if (sig.startswith(sigDic[ext]))==0:
 
             self.log(Level.INFO, "Found a text file: " + file.getName())
             self.filesFound+=1
@@ -196,7 +196,8 @@ class SampleJythonFileIngestModule(FileIngestModule):
             while (len != -1):
                     totLen = totLen + len
                     len = inputStream.read(buffer)
-
+        else:
+            os.system("del "+temp_File)
         f.close()
         return IngestModule.ProcessResult.OK
 
