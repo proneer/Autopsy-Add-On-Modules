@@ -33,12 +33,14 @@
 #
 # Looks for big files that are a multiple of 4096 and makes artifacts
 
+import os
 import re
 
 import jarray
 import inspect
 from java.lang import System
 from java.util.logging import Level
+from java.io import File
 from org.sleuthkit.datamodel import SleuthkitCase
 from org.sleuthkit.datamodel import AbstractFile
 from org.sleuthkit.datamodel import ReadContentInputStream
@@ -55,6 +57,7 @@ from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
 from org.sleuthkit.autopsy.coreutils import Logger
 from org.sleuthkit.autopsy.casemodule import Case
+from org.sleuthkit.autopsy.datamodel import ContentUtils
 from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 # This will work in 4.0.1 and beyond
@@ -144,24 +147,28 @@ class FindLogFilesIngestModule(DataSourceIngestModule):
             tmpPath = os.path.join(Case.getCurrentCase().getTempDirectory(), str(file.getName()))
             ContentUtils.writeToFile(file, File(tmpPath))
             fdata = open(tmpPath, "rb")
-            result = open('C:\\User\\LHS\\Desktop\\result.txt', 'wb+')
+            FLFpath = os.path.join(Case.getCurrentCase().getTempDirectory(),'..','FindLogFilesResult')
+            if not os.path.exists(FLFpath):
+                os.mkdir(FLFpath)
+            result = open(os.path.join(FLFpath,'result.txt'), 'ab')
             # filename check
-            date = re.findall('([\d]{4}.?[\d]{2}.?[\d]{2}[T|_|-][\d]*)', file.getName())
+            date = re.findall('([\d]{4}.?[\d]{2}.?[\d]{2})', file.getName())
 
             # Case 1: date is in filename
             if(date != []):
-                dnt = re.findall('([T|_|-][\d]*)', date[0])
+                dnt = re.findall('([\d]{4}.?[\d]{2}.?[\d]{2}[T|_|-][\d]*)', file.getName())
                 # Case 1-1: time is also in filename
                 if(dnt != []):
-                    result.write(file.getName()+' >> '+date[0]+' '+dnt[0]+'\n')
+                    result.write(file.getName()+' >> '+dnt[0]+'\r\n')
                 # Case 1-2: time is not in filename -- find time in file data
                 else:
                     line = fdata.readline()
                     timefind = []
                     while line != "":
+                        #result.write(line)
                         timefind = re.findall('([\d]{2}[:][\d]{2}[:][\d]{2})',line)
                         if timefind != []:
-                            result.write(file.getName()+' >> '+date[0]+' '+timefind[0]+'\n')
+                            result.write(file.getName()+' >> '+date[0]+' '+timefind[0]+'\r\n')
                             break
                         line = fdata.readline()
             # Case 2: date is not in filename -- find datetime in file data
@@ -171,7 +178,7 @@ class FindLogFilesIngestModule(DataSourceIngestModule):
                 while line != "":
                     dtfind = re.findall('([\d]{4}.?[\d]{2}.?[\d]{2}[T|_|-][\d]*)',line)
                     if dtfind != []:
-                        result.write(file.getName()+' >> '+date[0]+' '+dtfind[0]+'\n')
+                        result.write(file.getName()+' >> '+dtfind[0]+'\r\n')
                         break
                     line = fdata.readline()
             fdata.close()
