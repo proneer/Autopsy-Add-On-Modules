@@ -177,6 +177,7 @@ class FindLogFilesIngestModule(DataSourceIngestModule):
             fdata.close()
             result.close()
 
+
             # This will work in 4.0.1 and beyond
             #try:
             #    # index the artifact for keyword search
