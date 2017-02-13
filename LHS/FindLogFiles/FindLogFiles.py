@@ -33,6 +33,7 @@
 #
 # Looks for big files that are a multiple of 4096 and makes artifacts
 
+import re
 
 import jarray
 import inspect
@@ -137,6 +138,44 @@ class FindLogFilesIngestModule(DataSourceIngestModule):
             att = BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SET_NAME.getTypeID(), 
             FindLogFilesIngestModuleFactory.moduleName, "Log Files")
             art.addAttribute(att)
+
+            ############# This is finding datetime information ###################
+            # Step 1: Save file temporary and open it
+            tmpPath = os.path.join(Case.getCurrentCase().getTempDirectory(), str(file.getName()))
+            ContentUtils.writeToFile(file, File(tmpPath))
+            fdata = open(tmpPath, "rb")
+            result = open('C:\\User\\LHS\\Desktop\\result.txt', 'wb+')
+            # filename check
+            date = re.findall('([\d]{4}.?[\d]{2}.?[\d]{2}[T|_|-][\d]*)', file.getName())
+
+            # Case 1: date is in filename
+            if(date != []):
+                dnt = re.findall('([T|_|-][\d]*)', date[0])
+                # Case 1-1: time is also in filename
+                if(dnt != []):
+                    result.write(file.getName()+' >> '+date[0]+' '+dnt[0]+'\n')
+                # Case 1-2: time is not in filename -- find time in file data
+                else:
+                    line = fdata.readline()
+                    timefind = []
+                    while line != "":
+                        timefind = re.findall('([\d]{2}[:][\d]{2}[:][\d]{2})',line)
+                        if timefind != []:
+                            result.write(file.getName()+' >> '+date[0]+' '+timefind[0]+'\n')
+                            break
+                        line = fdata.readline()
+            # Case 2: date is not in filename -- find datetime in file data
+            else:
+                line = fdata.readline()
+                dtfind = []
+                while line != "":
+                    dtfind = re.findall('([\d]{4}.?[\d]{2}.?[\d]{2}[T|_|-][\d]*)',line)
+                    if dtfind != []:
+                        result.write(file.getName()+' >> '+date[0]+' '+dtfind[0]+'\n')
+                        break
+                    line = fdata.readline()
+            fdata.close()
+            result.close()
 
             # This will work in 4.0.1 and beyond
             #try:
